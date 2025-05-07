@@ -2,8 +2,6 @@ const { PrismaClient: PrismaAppClient } = require('../../prisma/generated/app');
 import sql from 'mssql';
 import dbConfig from "../config/dbConfig";
 
-console.log('dbConfig', dbConfig);
-
 // Inicializa Prisma Client para GLPI (MySQL)
 export const appPrismaClient = new PrismaAppClient({
     datasources: {
@@ -22,7 +20,7 @@ export const vmixDiggerPool = new sql.ConnectionPool({
     database: dbConfig.vmix_digger.database ?? '',
     options: {
         encrypt: false,
-        trustServerCertificate: true
+        trustServerCertificate: true,
     }
 });
 
@@ -35,7 +33,7 @@ export const vmixIntegracaoPool = new sql.ConnectionPool({
     database: dbConfig.vmix_integracao.database ?? '',
     options: {
         encrypt: false,
-        trustServerCertificate: true
+        trustServerCertificate: true,
     }
 });
 

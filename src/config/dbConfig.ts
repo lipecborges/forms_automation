@@ -100,8 +100,6 @@ const dbConfig: Config = {
     },
 };
 
-console.log('dbConfig:', dbConfig);
-
 const currentEnv: keyof Config = (process.env.NODE_ENV as keyof Config) || 'development';
 
 if (!dbConfig[currentEnv]) {

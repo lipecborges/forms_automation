@@ -5,7 +5,7 @@ import { ServiceRepository } from '../model/servicesModel';
 import { ProcessorIe } from './processors/processor-ie';
 import { TicketProcessor } from './processors/processor.interface';
 import { AxiosError } from 'axios';
-import { ProcessorDtentregaav } from './processors/processor-dtentregaav';
+import { ProcessorDtentregaAv } from './processors/processor-dtentregaav';
 export class FormsFetcherService {
     private serviceRepository: ServiceRepository;
     private processors: Record<string, TicketProcessor>;
@@ -14,7 +14,7 @@ export class FormsFetcherService {
         this.serviceRepository = new ServiceRepository();
         this.processors = {
             'processor-ie': new ProcessorIe(),
-            'processor-dtentregaav': new ProcessorDtentregaav(),
+            'processor-dtentregaav': new ProcessorDtentregaAv(),
             // Adicionar processadores abaixo desse, assim que adicionar novas funcionalidades
         };
     }
@@ -23,7 +23,7 @@ export class FormsFetcherService {
         const activeServices = await this.serviceRepository.findActiveServices();
         const results: GroupedAnswers[] = [];
         const answerEndpoint = '/answers/';
-        console.log('activeServices', activeServices);
+        //console.log('activeServices', activeServices);
 
         for (const service of activeServices) {
             try {
@@ -37,10 +37,9 @@ export class FormsFetcherService {
                             const endpoint = `${answerEndpoint}${ticket.id}`;
                             const rawAnswers = await httpClient.get<any>(endpoint);
                             const validatedAnswers = groupedAnswersSchema.parse(rawAnswers); // Valida como array
-
                             // Processa cada answer individualmente 
                             for (const answer of validatedAnswers) {
-                                results.push(processor.process(answer));
+                                results.push(processor.process(answer, ticket)); // Adiciona o resultado do processamento ao array de resultados
                             }
                         } catch (error) {
                             console.error(`Erro ao buscar respostas para o ticket ${ticket.id}:`, error);

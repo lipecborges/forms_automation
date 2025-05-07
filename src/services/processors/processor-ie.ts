@@ -10,9 +10,10 @@ import { SchemaResponse } from '../../schemas/generalSchema';
 import { BuscaUf } from '../../controllers/vmix/searchController';
 import trataRespostaCnpja from '../../utils/functions/trataRespostaCnpja';
 import { validaCenariosFiscal } from '../../utils/functions/validacaoGrupo';
+import { TicketSchema } from '../../schemas/glpi/ticketSchema';
 
 export class ProcessorIe implements TicketProcessor {
-    process(data: GroupedAnswers): GroupedAnswers {
+    process(answer: GroupedAnswers, ticket: TicketSchema): GroupedAnswers {
         (async () => {
             // Constantes fixas
             const SIM = 'SIM';
@@ -37,10 +38,10 @@ export class ProcessorIe implements TicketProcessor {
             }
 
             // Dados brutos do formulário
-            const cnpj = data.questions['CNPJ'];
-            const cpf = data.questions['CPF'];
+            const cnpj = answer.questions['CNPJ'];
+            const cpf = answer.questions['CPF'];
             const taxId = cnpj || cpf;
-            const ticketId = data.ticketId;
+            const ticketId = answer.ticketId;
 
             console.log(`tipo de taxid: ${typeof taxId} e taxid: ${taxId}`);
             // Endpoints
@@ -54,11 +55,11 @@ export class ProcessorIe implements TicketProcessor {
             // Objeto do formulário
             const formulario: Formulario = {
                 taxId,
-                uf: data.questions['UF'],
-                tipoCliente: data.questions['Tipo']?.trim().toUpperCase() || null,
-                produtorRural: data.questions['Produtor_Rural']?.trim().toUpperCase() || null,
-                tipoInscricao: data.questions['Tipo_Inscrição']?.trim().toUpperCase() || null,
-                inscricaoEstadual: data.questions['Inscrição_Estadual']?.trim().toUpperCase().replace(/^0+/, '') || null,
+                uf: answer.questions['UF'],
+                tipoCliente: answer.questions['Tipo']?.trim().toUpperCase() || null,
+                produtorRural: answer.questions['Produtor_Rural']?.trim().toUpperCase() || null,
+                tipoInscricao: answer.questions['Tipo_Inscrição']?.trim().toUpperCase() || null,
+                inscricaoEstadual: answer.questions['Inscrição_Estadual']?.trim().toUpperCase().replace(/^0+/, '') || null,
             };
 
             let mensagemErro = '';
@@ -67,8 +68,6 @@ export class ProcessorIe implements TicketProcessor {
             let closeTicket = true;
             let solveTicket = true;
             let ticketInfo;
-
-            console.log('chegou aquiiiiiiiiiii')
 
             const validacaoFiscal: { status: number } = await httpClient.get(validacoesTicketEndpoint);
 
@@ -264,7 +263,7 @@ export class ProcessorIe implements TicketProcessor {
                     console.error('Erro capturado:', error);
 
                     // Verifica se o erro possui a estrutura esperada
-                    const cnpjaErrorResponse = error?.response?.data || {
+                    const cnpjaErrorResponse = error?.response?.answer || {
                         code: error?.response?.status || 500,
                         message: error?.message || 'Erro desconhecido',
                     };
@@ -287,7 +286,7 @@ export class ProcessorIe implements TicketProcessor {
 
         })();
 
-        return data;
+        return answer;
     }
 }
 

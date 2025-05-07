@@ -19,6 +19,7 @@ export const ticketSchema = z.array(
             name: z.string(),
             email: z.union([z.string(), z.array(z.string())]).optional().nullable(), // Já correto
             phone: z.string().nullable().optional(),
+            location: z.string().nullable().optional(),
         }),
     })
 );
