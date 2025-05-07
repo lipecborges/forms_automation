@@ -1,0 +1,2 @@
+export const textoInscricaoValidacaoIsento = (inscricao: string, uf: string) =>
+    `Valide as informações e aprove ou recuse a alteração. Foram encontradas as inscrições válidas <strong>${inscricao}</strong> na UF <strong>${uf}</strong>.<br><br> - <strong>RECUSA</strong>: chamado encerrado, sem alterações no cadastro.<br><br> - <strong>APROVAÇÃO</strong>: Inscrição Estadual atualizada para ISENTO.`;
