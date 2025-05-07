@@ -8,7 +8,6 @@ export class ProcessorDtentregaAv implements TicketProcessor {
     process(answer: GroupedAnswers, ticket: TicketSchema): GroupedAnswers {
         (async () => {
             console.log('console dentro do data carai de asa:');
-            console.log(answer);
             console.log(ticket);
         })();
 
