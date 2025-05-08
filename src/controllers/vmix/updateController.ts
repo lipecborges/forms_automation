@@ -57,6 +57,9 @@ export const atualizaDataProcesso = async (formulario: AlteraDataAvFormulario): 
         const dataAtualMaisUm = new Date(dataAtualAvDate);
         dataAtualMaisUm.setDate(dataAtualMaisUm.getDate() + 1);
 
+        const dataProcessoDateMaisUm = new Date(formulario.dataProcesso);
+        dataProcessoDateMaisUm.setDate(dataProcessoDateMaisUm.getDate() + 1);
+
         console.log('dataAtualAvDate:', dataAtualAvDate);
         console.log('dataEntregaDate:', dataEntregaDate);
         if (+dataAtualAvDate == +dataEntregaDate) {
@@ -85,7 +88,7 @@ export const atualizaDataProcesso = async (formulario: AlteraDataAvFormulario): 
                 } as SchemaResponse;
             }
 
-            const insereDataProcesso = await setDataEntregaAv(formulario)
+            const insereDataProcesso = await setDataEntregaAv(formulario, dataProcessoDateMaisUm)
             if (insereDataProcesso.count === 0) {
                 return {
                     status: 400,

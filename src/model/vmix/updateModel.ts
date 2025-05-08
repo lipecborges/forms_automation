@@ -65,9 +65,8 @@ export const setStatusPendIntegracao = async (idCliente: number): Promise<any> =
     }
 };
 
-export const setDataEntregaAv = async (formulario: AlteraDataAvFormulario): Promise<any> => {
+export const setDataEntregaAv = async (formulario: AlteraDataAvFormulario, dataDefault: Date): Promise<any> => {
     try {
-        console.log('formulario:', formulario);
         const pool = await vmixDiggerPool.connect();
         const result = await pool.request()
             .input('dataProcesso', formulario.dataProcesso)
@@ -75,9 +74,10 @@ export const setDataEntregaAv = async (formulario: AlteraDataAvFormulario): Prom
             .input('filial', formulario.filial)
             .input('nomeSolicitante', formulario.nomeSolicitante)
             .input('dataFormatada', dataFormatada)
+            .input('dataDefault', dataDefault)
             .query(`
-                INSERT INTO AV_MONITORAENTREGA (DATAPROCESSO, DATAENTREGAMANUAL, ID_LOJA, NOMEUSUALTERACAO, DATAINCLUSAO)
-                VALUES (@dataProcesso, @dataEntrega, @filial, @nomeSolicitante, @dataFormatada)
+                INSERT INTO AV_MONITORAENTREGA (DATAPROCESSO, DATAENTREGAMANUAL, ID_LOJA, NOMEUSUALTERACAO, DATAINCLUSAO, DATAENTREGADEFAULT)
+                VALUES (@dataProcesso, @dataEntrega, @filial, @nomeSolicitante, @dataFormatada, @dataDefault)
             `);
 
         console.log('Resultado do insert da data de entrega:', result);
