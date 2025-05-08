@@ -1,4 +1,17 @@
 import { vmixDiggerPool, vmixIntegracaoPool } from '../../services/dbService';
+import { AlteraDataAvFormulario } from '../../types/interface/dtEntregaAvInterface';
+
+// Obter a data atual
+const now = new Date();
+// Formatando a data para o formato do SQL Server (YYYY-MM-DD HH:mm:ss)
+const pad = (n: number) => n.toString().padStart(2, '0');
+const year = now.getFullYear();
+const month = pad(now.getMonth() + 1);
+const day = pad(now.getDate());
+const hours = pad(now.getHours());
+const minutes = pad(now.getMinutes());
+const seconds = pad(now.getSeconds());
+const dataFormatada = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 
 export const atualizaInscricaoVmix = async (taxId: number, inscricaoEstadual: string): Promise<any> => {
     try {
@@ -20,19 +33,8 @@ export const atualizaInscricaoVmix = async (taxId: number, inscricaoEstadual: st
 export const setStatusPendIntegracao = async (idCliente: number): Promise<any> => {
     try {
         const statusPendente = 0;
-        const now = new Date();
         const loja = 998;
         const tipoCadastro = 2;
-
-        // Formatando a data para o formato do SQL Server (YYYY-MM-DD HH:mm:ss)
-        const pad = (n: number) => n.toString().padStart(2, '0');
-        const year = now.getFullYear();
-        const month = pad(now.getMonth() + 1);
-        const day = pad(now.getDate());
-        const hours = pad(now.getHours());
-        const minutes = pad(now.getMinutes());
-        const seconds = pad(now.getSeconds());
-        const dataFormatada = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 
         const chave = `G${idCliente}${year}${month}${day}${hours}${minutes}${seconds}`;
 
@@ -62,3 +64,45 @@ export const setStatusPendIntegracao = async (idCliente: number): Promise<any> =
         throw error;
     }
 };
+
+export const setDataEntregaAv = async (formulario: AlteraDataAvFormulario): Promise<any> => {
+    try {
+        console.log('formulario:', formulario);
+        const pool = await vmixDiggerPool.connect();
+        const result = await pool.request()
+            .input('dataProcesso', formulario.dataProcesso)
+            .input('dataEntrega', formulario.dataEntrega)
+            .input('filial', formulario.filial)
+            .input('nomeSolicitante', formulario.nomeSolicitante)
+            .input('dataFormatada', dataFormatada)
+            .query(`
+                INSERT INTO AV_MONITORAENTREGA (DATAPROCESSO, DATAENTREGAMANUAL, ID_LOJA, NOMEUSUALTERACAO, DATAINCLUSAO)
+                VALUES (@dataProcesso, @dataEntrega, @filial, @nomeSolicitante, @dataFormatada)
+            `);
+
+        console.log('Resultado do insert da data de entrega:', result);
+        return result.rowsAffected[0]; // retorna o número de linhas inseridas
+    } catch (error: any) {
+        console.error('Error inserting data de entrega:', error.message);
+        throw error;
+    }
+}
+
+export const updateDataEntregaAv = async (formulario: AlteraDataAvFormulario): Promise<any> => {
+    try {
+        const pool = await vmixDiggerPool.connect();
+        const result = await pool.request()
+            .input('dataProcesso', formulario.dataProcesso)
+            .input('dataEntrega', formulario.dataEntrega)
+            .input('filial', formulario.filial)
+            .input('nomeSolicitante', formulario.nomeSolicitante)
+            .input('dataFormatada', dataFormatada)
+            .query('UPDATE AV_MONITORAENTREGA SET DATAENTREGAMANUAL = @dataEntrega, NOMEUSUALTERACAO = @nomeSolicitante, DATAALTERACAO = @dataFormatada WHERE DATAPROCESSO = @dataProcesso AND ID_LOJA = @filial');
+
+        console.log('Resultado da atualização da data de entrega:', result);
+        return result.rowsAffected[0]; // retorna o número de linhas atualizadas
+    } catch (error: any) {
+        console.error('Error updating data de entrega:', error.message);
+        throw error;
+    }
+}
