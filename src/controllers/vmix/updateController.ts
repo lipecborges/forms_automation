@@ -63,7 +63,6 @@ export const atualizaDataProcesso = async (formulario: AlteraDataAvFormulario): 
         console.log('dataAtualAvDate:', dataAtualAvDate);
         console.log('dataEntregaDate:', dataEntregaDate);
         if (+dataAtualAvDate == +dataEntregaDate) {
-            console.log('entrou aqui')
             return {
                 status: 400,
                 message: 'A data de entrega informada é igual a data atual',

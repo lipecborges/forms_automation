@@ -27,7 +27,6 @@ export class ProcessorDtentregaAv implements TicketProcessor {
                 requesterLocation = answer.questions['Filial'];
             }
 
-
             if (requesterLocation == null || requesterLocation == undefined) {
                 return {
                     status: 400,
@@ -45,18 +44,25 @@ export class ProcessorDtentregaAv implements TicketProcessor {
                 dataEntrega: answer.questions['Entregas_para_o_dia'],
             };
 
-            console.log('formulario:', formulario);
-
-            const atualizaDataEntrega = await atualizaDataProcesso(formulario);
-            if (atualizaDataEntrega.status == 400) {
-                mensagemErro = atualizaDataEntrega.message;
-                closeTicket = true;
-                solveTicket = true;
-            } else {
-                mensagemSucesso = atualizaDataEntrega.message;
+            if (formulario.dataProcesso < formulario.dataEntrega) {
+                mensagemErro = 'A data de entrega não pode ser menor que a data do dia';
                 closeTicket = true;
                 solveTicket = true;
             }
+
+            if (!mensagemErro) { 
+                const atualizaDataEntrega = await atualizaDataProcesso(formulario);
+                if (atualizaDataEntrega.status == 400) {
+                    mensagemErro = atualizaDataEntrega.message;
+                    closeTicket = true;
+                    solveTicket = true;
+                } else {
+                    mensagemSucesso = atualizaDataEntrega.message;
+                    closeTicket = true;
+                    solveTicket = true;
+                }
+            }
+
             ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
 
             return await httpClient.post(addAcompanhamentoEndpoint, ticketInfo)

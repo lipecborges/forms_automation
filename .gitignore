@@ -4,3 +4,6 @@ node_modules
 
 # Ignorando Prisma generated.
 prisma/generated/
+prisma/schema-app.prisma
+prisma/schema-vmix.prisma
+prisma/schema-vmix-int.prisma
