@@ -1,5 +1,6 @@
-import { buscaUfCliente } from '../../model/vmix/searchModel';
+import { buscaDataEntregaAv, buscaUfCliente } from '../../model/vmix/searchModel';
 import { SchemaResponse } from '../../schemas/generalSchema';
+import { AlteraDataAvFormulario } from '../../types/interface/dtEntregaAvInterface';
 
 export const BuscaUf = async (taxId: string): Promise<any> => {
     try {
@@ -20,3 +21,21 @@ export const BuscaUf = async (taxId: string): Promise<any> => {
         throw error;
     }
 };
+
+export const buscaDataProcessoAv = async (formulario: AlteraDataAvFormulario): Promise<any> => {
+    try {
+        const dataEntregaAv = await buscaDataEntregaAv(formulario);
+        if (!dataEntregaAv || dataEntregaAv == null) {
+            return {
+                status: 400,
+                message: 'Nâo foi encontrado a data de entrega do processo',
+            } as SchemaResponse;
+        }
+
+        return dataEntregaAv
+
+    } catch (error: any) {
+        console.error(`Erro ao buscar data do atual no visual av:`, error.message);
+        throw error;
+    }
+}

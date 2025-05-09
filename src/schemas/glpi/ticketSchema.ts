@@ -46,7 +46,7 @@ export const validacoesTicketSchema = z.array(
 export const solTicketSchema = z.object({
     conteudo: z.string(),
     error: z.string().optional(),
-    type: z.enum(['criaOp', 'estornaOp', 'ie', 'regInfo']).optional(),
+    type: z.enum(['criaOp', 'estornaOp', 'ie', 'regInfo', 'dtentregaav']).optional(),
     alert: z.string().optional(),
 });
 
@@ -59,7 +59,7 @@ export const solicitaValidacaoSchema = z.object({
 export const adicionaAcompanhamentoSchema = z.object({
     content: z.string(),
     error: z.string().optional(),
-    type: z.enum(['criaOp', 'estornaOp', 'ie', 'regInfo']),
+    type: z.enum(['criaOp', 'estornaOp', 'ie', 'regInfo', 'dtentregaav']).optional(),
     alert: z.string().optional(),
     solve: z.boolean().optional(),
     close: z.boolean().optional(),
