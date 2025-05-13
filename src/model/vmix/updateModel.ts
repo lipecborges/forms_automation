@@ -76,8 +76,8 @@ export const setDataEntregaAv = async (formulario: AlteraDataAvFormulario, dataD
             .input('dataFormatada', dataFormatada)
             .input('dataDefault', dataDefault)
             .query(`
-                INSERT INTO AV_MONITORAENTREGA (DATAPROCESSO, DATAENTREGAMANUAL, ID_LOJA, NOMEUSUINCLUSAO, DATAINCLUSAO, DATAENTREGADEFAULT)
-                VALUES (@dataProcesso, @dataEntrega, @filial, @nomeSolicitante, @dataFormatada, @dataDefault)
+                INSERT INTO AV_MONITORAENTREGA (DATAPROCESSO, DATAENTREGAMANUAL, ID_LOJA, NOMEUSUINCLUSAO, DATAINCLUSAO, DATAENTREGADEFAULT, NOMEUSUALTERACAO)
+                VALUES (@dataProcesso, @dataEntrega, @filial, @nomeSolicitante, @dataFormatada, @dataDefault, @nomeSolicitante)
             `);
 
         console.log('Resultado do insert da data de entrega:', result);
