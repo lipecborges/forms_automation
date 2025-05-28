@@ -43,6 +43,12 @@ export async function validaCenariosFiscal(
             if (inscricoesValidas.length === 1 && formulario.tipoInscricao != ISENTO) {
                 inscricoesValidas[0].number = inscricoesValidas[0].number.replace(/^0+/, ''); // Removendo zero a esquerda
                 const inscricao = inscricoesValidas.find(i => i.number === formulario.inscricaoEstadual);
+                if (!inscricao) {
+                    mensagemErro = 'Inscrição Estadual informada no formulário não corresponde a nenhuma inscrição válida no cadastro.';
+                    ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
+                    const adicionaAcompanhamento = await httpClient.post(addAcompanhamentoEndpoint, ticketInfo);
+                    return adicionaAcompanhamento;
+                }
 
                 if (inscricao.number === formulario.inscricaoEstadual) {
                     if (inscricao.enabled) {
