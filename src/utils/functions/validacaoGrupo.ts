@@ -6,6 +6,7 @@ import { textoInscricaoValidacaoIsento } from '../../utils/html/htmlInscricao';
 import { atualizarInscricao } from '../../controllers/vmix/updateController';
 import { Formulario } from '../../types/interface/ieInterface';
 import { errorStatuses } from '../constants';
+import { close } from 'fs';
 
 export async function validaCenariosFiscal(
     validacaoFiscal: { status: number },
@@ -45,6 +46,8 @@ export async function validaCenariosFiscal(
                 const inscricao = inscricoesValidas.find(i => i.number === formulario.inscricaoEstadual);
                 if (!inscricao) {
                     mensagemErro = 'Inscrição Estadual informada no formulário não corresponde a nenhuma inscrição válida no cadastro.';
+                    closeTicket = true;
+                    solveTicket = true;
                     ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
                     const adicionaAcompanhamento = await httpClient.post(addAcompanhamentoEndpoint, ticketInfo);
                     return adicionaAcompanhamento;
