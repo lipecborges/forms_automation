@@ -1,12 +1,14 @@
-import { atualizaInscricaoVmix, setDataEntregaAv, setStatusPendIntegracao, updateDataEntregaAv } from '../../model/vmix/updateModel';
-import { buscaIdCliente } from '../../model/vmix/searchModel';
+import { atualizaInscricaoVmix, atualizaTipoCliente, setDataEntregaAv, setStatusPendIntegracao, updateDataEntregaAv } from '../../model/vmix/updateModel';
+import { buscaIdCliente, buscaTipoCliente } from '../../model/vmix/searchModel';
 import { SchemaResponse } from '../../schemas/generalSchema';
 import { Formulario } from '../../types/interface/ieInterface';
 import { AlteraDataAvFormulario } from '../../types/interface/dtEntregaAvInterface';
 import { buscaDataProcessoAv } from './searchController';
 
-export const atualizarInscricao = async (taxId: string, inscricaoEstadual: string): Promise<SchemaResponse> => {
+export const atualizarInscricao = async (taxId: string, inscricaoEstadual: string, produtorRural: string): Promise<SchemaResponse> => {
     try {
+        const SIM = 'SIM';
+        const IDPRODUTOR_RURAL: number = 13;
         const taxIdFloat = parseFloat(taxId);
         const inscricaoEstadualStr = String(inscricaoEstadual);
         const response = await atualizaInscricaoVmix(taxIdFloat, inscricaoEstadualStr);
@@ -16,6 +18,16 @@ export const atualizarInscricao = async (taxId: string, inscricaoEstadual: strin
                 status: 400,
                 message: 'Não foi encontrado nenhum registro para o taxId informado',
             } as SchemaResponse;
+        }
+
+        if (produtorRural === SIM) {
+            const alteraTipoCliente = await atualizaTipoCliente(taxIdFloat, IDPRODUTOR_RURAL);
+            if (alteraTipoCliente.count === 0) {
+                return {
+                    status: 400,
+                    message: 'Não foi encontrado cliente para o taxId informado',
+                } as SchemaResponse;
+            }
         }
 
         const idCliente = await buscaIdCliente(taxIdFloat);

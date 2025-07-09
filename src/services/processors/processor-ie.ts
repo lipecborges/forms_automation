@@ -42,6 +42,7 @@ export class ProcessorIe implements TicketProcessor {
             const cpf = answer.questions['CPF'];
             const taxId = cnpj || cpf;
             const ticketId = answer.ticketId;
+            const produtorRural = answer.questions['Produtor_Rural']?.trim().toUpperCase() || 'NÃO';
 
             console.log(`tipo de taxid: ${typeof taxId} e taxid: ${taxId}`);
             // Endpoints
@@ -101,8 +102,7 @@ export class ProcessorIe implements TicketProcessor {
                     return addAcompanhamento;
                 }
 
-                if (formulario.produtorRural === SIM) { // Tratamento para inscrição estadual
-
+                if (produtorRural === SIM) { // Tratamento para inscrição estadual
                     const cnpjaResposta = await cnpjaApi.get<CnpjaResponse>(endpointCnpja, {
                         taxId,
                         states: formulario.uf,
@@ -137,7 +137,7 @@ export class ProcessorIe implements TicketProcessor {
                             const numeroInscricao = inscricao.number;
                             switch (inscricao.status.id) {
                                 case 1:
-                                    const atualizaInscricao = await atualizarInscricao(taxId, numeroInscricao);
+                                    const atualizaInscricao = await atualizarInscricao(taxId, numeroInscricao, produtorRural);
                                     if (errorStatuses.includes(atualizaInscricao.status)) {
                                         return atualizaInscricao;
                                     }
@@ -170,7 +170,7 @@ export class ProcessorIe implements TicketProcessor {
                         ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
                     }
                 } else { // Tratamento para ISENTO
-                    const atualizaInscricao = await atualizarInscricao(taxId, ISENTO);
+                    const atualizaInscricao = await atualizarInscricao(taxId, ISENTO, produtorRural);
                     if (errorStatuses.includes(atualizaInscricao.status)) {
                         mensagemErro = 'Não foi encontrado cliente com o CPF informado';
                         ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
@@ -236,7 +236,7 @@ export class ProcessorIe implements TicketProcessor {
                     } else if (formulario.tipoInscricao === ISENTO) {
 
                         if (inscricoes.length === 0) {
-                            const atualizaInscricao = await atualizarInscricao(taxId, ISENTO);
+                            const atualizaInscricao = await atualizarInscricao(taxId, ISENTO, produtorRural);
                             if (errorStatuses.includes(atualizaInscricao.status)) {
                                 mensagemErro = 'Não foi encontrado cliente com o CPF informado';
                                 ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);

@@ -21,11 +21,25 @@ export const atualizaInscricaoVmix = async (taxId: number, inscricaoEstadual: st
             .input('taxId', taxId)
             .query('UPDATE CLIENTES SET INSCESTADUAL = @inscricaoEstadual WHERE CPF = @taxId');
 
-        // result.rowsAffected[0] indica quantas linhas foram atualizadas
         console.log('Update result:', result);
         return result.rowsAffected[0];
     } catch (error: any) {
         console.error('Error updating inscrição estadual:', error.message);
+        throw error;
+    }
+};
+
+export const atualizaTipoCliente = async (taxId: number, tipoCliente: number): Promise<any> => {
+    try {
+        const pool = await vmixDiggerPool.connect();
+        const result = await pool.request()
+            .input('tipoCliente', tipoCliente)
+            .input('taxId', taxId)
+            .query('UPDATE CLIENTES SET IDCLIENTETIPO = @tipoCliente WHERE CPF = @taxId');
+        console.log('Update result:', result);
+        return result.rowsAffected[0];
+    } catch (error: any) {
+        console.error('Error updating tipo cliente:', error.message);
         throw error;
     }
 };
