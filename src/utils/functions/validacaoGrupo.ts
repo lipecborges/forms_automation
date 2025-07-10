@@ -33,6 +33,8 @@ export async function validaCenariosFiscal(
         3: 'Vedada operação como destinatário na UF.'
     }
 
+    const produtorRural = formulario.produtorRural?.trim().toUpperCase() || 'NÃO';
+
     const addAcompanhamentoEndpoint = `/adicionaAcompanhamento/${ticketId}`;
     const solicitaValidacaoEndpoint = `/solicitaValidacao/${ticketId}`;
 
@@ -58,7 +60,7 @@ export async function validaCenariosFiscal(
                         const numeroInscricao = inscricao.number;
                         switch (inscricao.status.id) {
                             case 1:
-                                const atualizaInscricao = await atualizarInscricao(taxId, numeroInscricao);
+                                const atualizaInscricao = await atualizarInscricao(taxId, numeroInscricao, produtorRural);
                                 if (errorStatuses.includes(atualizaInscricao.status)) {
                                     return atualizaInscricao;
                                 }
@@ -116,7 +118,7 @@ export async function validaCenariosFiscal(
 
         case 3:
             if (formulario.tipoInscricao === ISENTO) {
-                const atualizaInscricao = await atualizarInscricao(taxId, ISENTO);
+                const atualizaInscricao = await atualizarInscricao(taxId, ISENTO, produtorRural);
                 if (errorStatuses.includes(atualizaInscricao.status)) {
                     mensagemErro = 'Não foi encontrado cliente com o CPF informado';
                 } else {
@@ -126,7 +128,7 @@ export async function validaCenariosFiscal(
                 }
             } else if (formulario.tipoInscricao === CONTRIBUINTE) {
                 let numeroInscricao = formulario.inscricaoEstadual?.trim().toUpperCase() || '';
-                const atualizaInscricao = await atualizarInscricao(taxId, numeroInscricao);
+                const atualizaInscricao = await atualizarInscricao(taxId, numeroInscricao, produtorRural);
                 if (errorStatuses.includes(atualizaInscricao.status)) {
                     mensagemErro = 'Não foi encontrado cliente com o CPF informado';
                 } else {
