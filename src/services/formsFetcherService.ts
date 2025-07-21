@@ -13,8 +13,9 @@ export class FormsFetcherService {
     constructor() {
         this.serviceRepository = new ServiceRepository();
         this.processors = {
-            'processor-ie': new ProcessorIe(),
-            'processor-dtentregaav': new ProcessorDtentregaAv(),
+            'processor-dtentregaov': new ProcessorDtentregaAv(),
+            //'processor-ie': new ProcessorIe(),
+            //'processor-dtentregaav': new ProcessorDtentregaAv(),
             // Adicionar processadores abaixo desse, assim que adicionar novas funcionalidades
         };
     }
@@ -27,6 +28,8 @@ export class FormsFetcherService {
 
         for (const service of activeServices) {
             try {
+
+                console.log('service', service);
                 const rawData = await httpClient.get<any>(service.endpoint);
 
                 const validatedData = ticketSchema.parse(rawData); // Array de tickets

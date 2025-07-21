@@ -16,3 +16,22 @@ export const cnpjaStrategy = process.env.CNPJA_STRATEGY;
 
 export const errorStatuses = [400, 404, 422];
 
+// Variáveis de ambiente para o SAP oDATA
+
+const sapOdataConfigs:any = {
+  development: {
+    baseUrl: process.env.DEV_SAP_ODATA_API_BASE_URL,
+    username: process.env.DEV_SAP_ODATA_USERNAME,
+    password: process.env.DEV_SAP_ODATA_PASSWORD,
+  },
+  production: {
+    baseUrl: process.env.SAP_ODATA_API_BASE_URL,
+    username: process.env.SAP_ODATA_USERNAME,
+    password: process.env.SAP_ODATA_PASSWORD,
+  },
+};
+
+export const sapOdataBaseUrl = sapOdataConfigs[ENV].baseUrl;
+export const sapOdataUsername = sapOdataConfigs[ENV].username;
+export const sapOdataPassword = sapOdataConfigs[ENV].password;
+export const sapOdataClientId = process.env.SAP_ODATA_CLIENT_ID;

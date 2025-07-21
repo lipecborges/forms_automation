@@ -12,6 +12,7 @@ export class HttpClient {
     }
 
     async get<T>(endpoint: string): Promise<T> {
+        console.log('api_base_url', API_URL);
         const response = await this.client.get(endpoint);
         return response.data;
     }

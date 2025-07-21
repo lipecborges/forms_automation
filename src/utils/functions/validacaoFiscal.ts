@@ -9,7 +9,7 @@ import { errorStatuses } from '../../utils/constants';
 export async function validacaoFiscal(
     validacaoFiscal: { status: number },
     inscricoes: any[],
-    formulario: { uf: string },
+    formulario: { uf: string, produtorRural?: string },
     taxId: string,
     tipoForm: Type,
     httpClient: any,
@@ -26,6 +26,8 @@ export async function validacaoFiscal(
 
     const addAcompanhamentoEndpoint = `/adicionaAcompanhamento/${ticketId}`;
     const solicitaValidacaoEndpoint = `/solicitaValidacao/${ticketId}`;
+
+    const produtorRural = formulario.produtorRural?.trim().toUpperCase() || 'NÃO';
 
     let ticketInfo: AdicionaAcompanhamentoSchema;
 
@@ -58,7 +60,7 @@ export async function validacaoFiscal(
             } as SchemaResponse;
 
         case 3:
-            const atualizaInscricao = await atualizarInscricao(taxId, ISENTO);
+            const atualizaInscricao = await atualizarInscricao(taxId, ISENTO, produtorRural);
             if (errorStatuses.includes(atualizaInscricao.status)) {
                 mensagemErro = 'Não foi encontrado cliente com o CPF informado';
             } else {

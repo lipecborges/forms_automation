@@ -29,6 +29,12 @@ export class ServiceRepository {
                 endpoint: '/ticketsValidados/dtentregaav',
                 isActive: true,
                 processorType: 'processor-dtentregaav',
+            },
+            {
+                name: 'Data Entrega OV',
+                endpoint: '/ticketsValidados/dtentregaov',
+                isActive: true,
+                processorType: 'processor-dtentregaov',
             }
         ];
 

@@ -48,7 +48,6 @@ export class ProcessorIe implements TicketProcessor {
             // Endpoints
             const solTicketEndpoint = `/solucionaTicket/${ticketId}`;
             const validacoesTicketEndpoint = `/validacoesTicket/${ticketId}?grupo=${GRUPO_VALIDACAO}`;
-            const solicitaValidacaoEndpoint = `/solicitaValidacao/${ticketId}`;
             const addAcompanhamentoEndpoint = `/adicionaAcompanhamento/${ticketId}`;
             const endpointCnpja = '/ccc';
             const tipoForm = 'ie';
