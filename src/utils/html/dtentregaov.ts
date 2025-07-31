@@ -1,4 +1,4 @@
-export const textoValidacaoLogistica = (ov: string, centro: string, dtatual: string, dtnova: string) =>
+export const textoValidacaoLogistica = (ov: string, centro: string, dtatual: string, dtnova: string, infodata: string) =>
     `<div style="max-width: 500px; margin: 0 auto; font-family: Arial, sans-serif; color: #333; line-height: 1.5;">
     <div style="text-align: center; background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
         <strong>Valide as informações e aprove ou recuse a alteração</strong>
@@ -17,8 +17,14 @@ export const textoValidacaoLogistica = (ov: string, centro: string, dtatual: str
         <div style="margin-bottom: 12px; padding: 8px; background: #f8f8f8; border-radius: 3px;">
             <strong>DATA ATUAL:</strong> ${dtatual}
         </div>
-        <div style="padding: 8px; background: #f0f8ff; border-radius: 3px;">
+        <div style="padding: 8px; margin-bottom:12px; background: #f0f8ff; border-radius: 3px;">
             <strong>DATA SOLICITADA:</strong> ${dtnova}
+        </div>
+        <div style="padding: 8px; background: ${infodata.includes('antecipar') ? '#d1e7dd' :
+        infodata.includes('postergar') ? '#f8d7da' :
+            '#f0f8ff'
+    }; border-radius: 3px;">
+            <strong>${infodata}</strong> 
         </div>
     </div>
 
@@ -32,7 +38,7 @@ export const textoValidacaoLogistica = (ov: string, centro: string, dtatual: str
     </div>
 </div>`;
 
-export const textoValidacaoGerente = (ov: string, centro: string, dtatual: string, dtnova: string) =>
+export const textoValidacaoGerente = (ov: string, centro: string, dtatual: string, dtnova: string, infodata: string) =>
     `<div style="max-width: 500px; margin: 0 auto; font-family: Arial, sans-serif; color: #333; line-height: 1.5;">
 
     <div style="text-align: center; background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
@@ -53,8 +59,14 @@ export const textoValidacaoGerente = (ov: string, centro: string, dtatual: strin
         <div style="margin-bottom: 12px; padding: 8px; background: #f8f8f8; border-radius: 3px;">
             <strong>DATA ATUAL:</strong> ${dtatual}
         </div>
-        <div style="padding: 8px; background: #f0f8ff; border-radius: 3px;">
+        <div style="padding: 8px; margin-bottom: 12px; background: #f0f8ff; border-radius: 3px;">
             <strong>DATA SOLICITADA:</strong> ${dtnova}
+        </div>
+        <div style="padding: 8px; background: ${infodata.includes('antecipar') ? '#d1e7dd' :
+        infodata.includes('postergar') ? '#f8d7da' :
+            '#f0f8ff'
+    }; border-radius: 3px;">
+            <strong>${infodata}</strong> 
         </div>
     </div>
 
@@ -68,7 +80,7 @@ export const textoValidacaoGerente = (ov: string, centro: string, dtatual: strin
     </div>
 </div>`;
 
-export const textoValidacaoUnicaGerente = (ov: string, centro: string, dtatual: string, dtnova: string) =>
+export const textoValidacaoUnicaGerente = (ov: string, centro: string, dtatual: string, dtnova: string, infodata: string) =>
     `<div style="max-width: 500px; margin: 0 auto; font-family: Arial, sans-serif; color: #333; line-height: 1.5;">
     <div style="text-align: center; background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
         <strong>Valide as informações e aprove ou recuse a alteração</strong>
@@ -87,8 +99,14 @@ export const textoValidacaoUnicaGerente = (ov: string, centro: string, dtatual: 
         <div style="margin-bottom: 12px; padding: 8px; background: #f8f8f8; border-radius: 3px;">
             <strong>DATA ATUAL:</strong> ${dtatual}
         </div>
-        <div style="padding: 8px; background: #f0f8ff; border-radius: 3px;">
+        <div style="padding: 8px; margin-bottom: 12px; background: #f0f8ff; border-radius: 3px;">
             <strong>DATA SOLICITADA:</strong> ${dtnova}
+        </div>
+        <div style="padding: 8px; background: ${infodata.includes('antecipar') ? '#d1e7dd' :
+        infodata.includes('postergar') ? '#f8d7da' :
+            '#f0f8ff'
+    }; border-radius: 3px;">
+            <strong>${infodata}</strong> 
         </div>
     </div>
 

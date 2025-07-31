@@ -8,7 +8,7 @@ import { GroupedAnswers } from '../../schemas/glpi/answerSchema';
 import { httpClient } from '../../services/httpClient';
 import { sapOdataClient } from '../../services/sapOdataClient';
 import { textoValidacaoGerente, textoValidacaoLogistica, textoValidacaoUnicaGerente } from '../html/dtentregaov';
-import { formatarDataBr } from '../../utils/functions/formatarDataBr';
+import { formatarDataBr, parseDataBr } from '../../utils/functions/formatarDataBr';
 import { toSapOdataDate } from '../../utils/functions/toSapOdataDate';
 
 export async function validacaoGerencial(
@@ -29,6 +29,18 @@ export async function validacaoGerencial(
     let mensagemErro = '';
     let mensagemAlerta = '';
     let userValidateId: number | undefined;
+    let infoData = '';
+
+    const dataEntrega = new Date(answer.questions['Data_de_Entrega']);
+    console.log('chegou aqui depois do dataEntrega', dataEntrega);
+    console.log('dataentrevaov', formatarDataBr(dadosOV.dataEntrega));
+    const dataEntregaOld = parseDataBr(formatarDataBr(dadosOV.dataEntrega));
+
+    const dataEntregaStr = dataEntrega.toISOString().slice(0, 10);
+    const dataEntregaOldStr = dataEntregaOld.toISOString().slice(0, 10);
+
+    let diffMs = dataEntrega.getTime() - dataEntregaOld.getTime();
+    let diffData = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
     const MOTIVO_ALTERACAO = ` > Motivo: ${answer.questions['Motivo']} - Ticket: ${ticketId}`
     const USUARIO_SOLICITACAO = ticket.requester.name;
@@ -47,13 +59,20 @@ export async function validacaoGerencial(
         case 1: // Precisa de validação
             console.log('entrou no case 1, precisa de validação');
             mensagemErro = 'Necessário validação do Gerente da Filial'
+            if (dataEntregaStr < dataEntregaOldStr) {
+                infoData = `A data de entrega irá antecipar ${Math.abs(diffData)} dia(s).`;
+            } else if (dataEntregaStr > dataEntregaOldStr) {
+                infoData = `A data de entrega irá postergar ${diffData} dia(s).`;
+            } else {
+                infoData = `A data de entrega não foi alterada.`;
+            }
             if (GRUPO_VALIDACAO === GRUPO_VALIDACAO_GERENTE && !validacaoFabrica) {
-                mensagemAlerta = textoValidacaoUnicaGerente(dadosOV.ordem, dadosOV.centro, dataEntregaAtual, dataEntregaSolicitada);
+                mensagemAlerta = textoValidacaoUnicaGerente(dadosOV.ordem, dadosOV.centro, dataEntregaAtual, dataEntregaSolicitada, infoData);
             } else if (GRUPO_VALIDACAO === GRUPO_VALIDACAO_GERENTE && validacaoFabrica) {
-                mensagemAlerta = textoValidacaoGerente(dadosOV.ordem, dadosOV.centro, dataEntregaAtual, dataEntregaSolicitada);
+                mensagemAlerta = textoValidacaoGerente(dadosOV.ordem, dadosOV.centro, dataEntregaAtual, dataEntregaSolicitada, infoData);
             } else {
                 mensagemErro = 'Necessário validação do Gerente de Planejamento de Produção e Logística';
-                mensagemAlerta = textoValidacaoLogistica(dadosOV.ordem, dadosOV.centro, dataEntregaAtual, dataEntregaSolicitada);
+                mensagemAlerta = textoValidacaoLogistica(dadosOV.ordem, dadosOV.centro, dataEntregaAtual, dataEntregaSolicitada, infoData);
             }
             const mensagemValidacao = 'Por gentileza, valide as informações e aprove ou recuse a alteração.';
             ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
@@ -62,6 +81,13 @@ export async function validacaoGerencial(
             if (errorStatuses.includes(adicionaAcompanhamento.status)) {
                 return { status: 400, message: 'Erro ao adicionar acompanhamento no ticket' } as SchemaResponse;
             }
+
+            // Ajuste relacionado quando o vendedor é de outra filial, excluindo fábrica.
+            let centroOvSemZeros = dadosOV.centro.replace(/^0+/, '');
+            if (!validacaoFabrica && (centroOvSemZeros !== filialVendedor)) {
+                GRUPO_VALIDACAO = `Filial 0${centroOvSemZeros} > Administrativo > Alterar Data de Entrega da Venda`;
+            }
+
             const validateInfo = createValidateInfo(mensagemValidacao, userValidateId, GRUPO_VALIDACAO);
 
             await new Promise(resolve => setTimeout(resolve, 2000)); // Delay de 2 segundos

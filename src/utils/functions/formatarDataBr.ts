@@ -20,3 +20,8 @@ export function formatarDataBr(data: string): string {
     // Retorna original se não for nenhum dos formatos
     return data;
 }
+
+export function parseDataBr(dataBr: string) {
+    const [dia, mes, ano] = dataBr.split('/');
+    return new Date(`${ano}-${mes}-${dia}`);
+}
