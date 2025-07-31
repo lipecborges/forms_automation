@@ -50,7 +50,7 @@ export class ProcessorDtentregaOv implements TicketProcessor {
             const codigoIntegracao = dadosOV.vendedor;
             const filialVendedor = await buscaFilialVendedor(codigoIntegracao);
 
-            const GRUPO_VALIDACAO_GERENTE = `Filial 0${filialVendedor} > Administrativo > Gerência`;
+            const GRUPO_VALIDACAO_GERENTE = `Filial 0${filialVendedor} > Administrativo > Alterar Data de Entrega da Venda`;
 
             console.log('Filial do vendedor:', filialVendedor);
             console.log('ticket:', ticket);
