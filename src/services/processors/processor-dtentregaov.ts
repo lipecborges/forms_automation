@@ -23,6 +23,7 @@ export class ProcessorDtentregaOv implements TicketProcessor {
         let ticketInfo;
 
         const ORDEM_VENDA = answer.questions['Ordem_de_Venda'];
+        const DATA_ENTREGA_SOLICITADA = answer.questions['Data_de_Entrega'];
         const TICKET_ID = ticket.id;
         const TIPO_FORM = 'dtentregaov';
         const GRUPO_VALIDACAO_FABRICA = 'Fábrica > Alterar Data de Entrega da Venda';
@@ -37,6 +38,30 @@ export class ProcessorDtentregaOv implements TicketProcessor {
         const VALIDACAO_ENDPOINT = `/validacoesTicket/${TICKET_ID}?grupo=`;
 
         try {
+            console.log('ticketId:', TICKET_ID);
+            console.log('Data de entrega solicitada:', DATA_ENTREGA_SOLICITADA);
+            const dataEntrega = new Date(DATA_ENTREGA_SOLICITADA);
+            const hoje = new Date();
+
+            const dataEntregaStr = dataEntrega.toISOString().slice(0, 10);
+            const hojeStr = hoje.toISOString().slice(0, 10);
+
+            console.log('Data de entrega formatada:', dataEntregaStr);
+            console.log('Data de hoje formatada:', hojeStr);
+            if (dataEntregaStr <= hojeStr) {
+                console.log('entrou aqui')
+                mensagemErro = 'Data de entrega solicitada deve ser maior ou igual a hoje.';
+                solveTicket = true;
+                closeTicket = true;
+                ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, TIPO_FORM, mensagemAlerta, solveTicket, closeTicket);
+                const adicionaAcompanhamento: any = await httpClient.post(ADD_ACOMPANHAMENTO_ENDPOINT, ticketInfo);
+
+                if (errorStatuses.includes(adicionaAcompanhamento.status)) {
+                    return { status: 400, message: 'Erro ao adicionar acompanhamento no ticket' } as SchemaResponse;
+                }
+
+                return { status: 400, message: mensagemErro } as SchemaResponse;
+            }
             const salesOrders = await sapOdataClient.get(ENDPOINT_GET);
 
             // Aqui você trata os dados
@@ -53,7 +78,6 @@ export class ProcessorDtentregaOv implements TicketProcessor {
             const GRUPO_VALIDACAO_GERENTE = `Filial 0${filialVendedor} > Administrativo > Alterar Data de Entrega da Venda`;
 
             console.log('Filial do vendedor:', filialVendedor);
-            console.log('ticket:', ticket);
 
             const validacaoGerenteStatus: { status: number } = await httpClient.get(`${VALIDACAO_ENDPOINT}${GRUPO_VALIDACAO_GERENTE}`);
 
@@ -86,8 +110,10 @@ export class ProcessorDtentregaOv implements TicketProcessor {
                 // return await httpClient.post(ADD_ACOMPANHAMENTO_ENDPOINT, ticketInfo);
             }
         } catch (error: any) {
+            console.log('caiu aqui')
             if (error.response) {
                 const data = error.response.data;
+                console.error('Erro ao alterar data de entrega:', data);
                 let mensagem = 'Erro ao alterar data de entrega';
 
                 // Acessa a mensagem do erro SAP OData
@@ -100,7 +126,6 @@ export class ProcessorDtentregaOv implements TicketProcessor {
                 // solveTicket = true;
                 // ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
                 // const encerraChamado = await httpClient.post(addAcompanhamentoEndpoint, ticketInfo);
-
                 return { status: error.response.status || 400, message: mensagem } as SchemaResponse;
             } else {
                 return { status: 500, message: 'Erro de comunicação com SAP' } as SchemaResponse;
