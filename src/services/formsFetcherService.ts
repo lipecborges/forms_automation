@@ -15,8 +15,8 @@ export class FormsFetcherService {
         this.serviceRepository = new ServiceRepository();
         this.processors = {
             'processor-dtentregaov': new ProcessorDtentregaOv(),
-            //'processor-ie': new ProcessorIe(),
-            //'processor-dtentregaav': new ProcessorDtentregaAv(),
+            'processor-ie': new ProcessorIe(),
+            'processor-dtentregaav': new ProcessorDtentregaAv(),
             // Adicionar processadores abaixo desse, assim que adicionar novas funcionalidadesT
         };
     }
