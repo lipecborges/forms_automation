@@ -22,8 +22,6 @@ export class SapOdataClient {
   }
 
   async get<T>(endpoint: string, config?: AxiosRequestConfig): Promise<T> {
-    console.log('Making GET request to:', endpoint);
-    console.log('Request config:', config);
     const response = await this.client.get(endpoint, config);
     return response.data;
   }

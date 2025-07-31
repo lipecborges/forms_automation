@@ -52,7 +52,6 @@ async function trataRespostaCnpja<T>(
 
         // Se o código não for 200 (ou outro código de sucesso), trata como erro
         if (cnpjaResponse.code !== 200) {
-            console.log(`Código de erro: ${cnpjaResponse.code}, Mensagem: ${errorInfo.message}`);
 
             const ticketInfo: AdicionaAcompanhamentoSchema = createTicketInfo(
                 '',
@@ -68,7 +67,6 @@ async function trataRespostaCnpja<T>(
                 ticketInfo,
             );
 
-            console.log('chegou antes do return');
             return adicionaAcompanhamento;
         }
 

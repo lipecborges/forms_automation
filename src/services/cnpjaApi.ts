@@ -35,7 +35,6 @@ export class CnpjaApi {
 
         try {
             const response = await this.client.get(endpoint, config);
-            console.log('chegou aqui');
             return response.data;
         } catch (error) {
             // Captura o erro e o retorna para ser tratado fora

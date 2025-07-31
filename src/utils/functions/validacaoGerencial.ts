@@ -1,5 +1,5 @@
 import { SchemaResponse } from '../../schemas/generalSchema';
-import { AdicionaAcompanhamentoSchema, Type } from '../../schemas/glpi/ticketSchema';
+import { AdicionaAcompanhamentoSchema, TicketSchema, Type } from '../../schemas/glpi/ticketSchema';
 import { createTicketInfo } from '../../utils/functions/createTicketInfo';
 import { createValidateInfo } from '../../utils/functions/createValidateInfo';
 import { errorStatuses } from '../constants';
@@ -19,6 +19,7 @@ export async function validacaoGerencial(
     dadosOV: DadosOV,
     filialVendedor: string,
     answer: GroupedAnswers,
+    ticket: TicketSchema,
     endpoint: string,
     validacaoFabrica: boolean
 ): Promise<SchemaResponse | any> {
@@ -29,6 +30,8 @@ export async function validacaoGerencial(
     let mensagemAlerta = '';
     let userValidateId: number | undefined;
 
+    const MOTIVO_ALTERACAO = ` > Motivo: ${answer.questions['Motivo']} - Ticket: ${ticketId}`
+    const USUARIO_SOLICITACAO = ticket.requester.name;
     const dataEntregaSolicitada = formatarDataBr(answer.questions['Data_de_Entrega']);
     const dataEntregaAtual = formatarDataBr(dadosOV.dataEntrega);
     const GRUPO_VALIDACAO_GERENTE = `Filial 0${filialVendedor} > Administrativo > Alterar Data de Entrega da Venda`;
@@ -38,7 +41,7 @@ export async function validacaoGerencial(
 
     console.log('entrou na função validacaoGerencial');
     let ticketInfo: AdicionaAcompanhamentoSchema;
-
+    console.log('tiicket', ticket)
 
     switch (validacao.status) {
         case 1: // Precisa de validação
@@ -78,11 +81,15 @@ export async function validacaoGerencial(
                 console.log('dadosOV:', dadosOV);
                 return { status: 400, message: 'Aprovado pelo gerente, mas não é necessário validação da fábrica.' } as SchemaResponse;
             }
-            console.log('chegou aqui ')
+
+            console.log('dataEntregaSolicitada:', dataEntregaSolicitada);
             const payloadDtEntrega = {
                 DATA_ENTREGA: toSapOdataDate(answer.questions['Data_de_Entrega']),
+                MOTIVO_ALTERACAO: MOTIVO_ALTERACAO,
+                USUARIO_SOLICITACAO: USUARIO_SOLICITACAO,
             };
 
+            console.log('payloadDtEntrega:', payloadDtEntrega);
             const alteraDtEntrega: any = await sapOdataClient.put(endpoint, payloadDtEntrega);
 
             if (errorStatuses.includes(alteraDtEntrega.status)) {

@@ -62,7 +62,6 @@ export class ProcessorDtentregaAv implements TicketProcessor {
             ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
 
             return await httpClient.post(addAcompanhamentoEndpoint, ticketInfo)
-            //console.log(ticket);
         })();
 
         return ticket;

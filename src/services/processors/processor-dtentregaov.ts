@@ -48,7 +48,7 @@ export class ProcessorDtentregaOv implements TicketProcessor {
 
             console.log('Data de entrega formatada:', dataEntregaStr);
             console.log('Data de hoje formatada:', hojeStr);
-            if (dataEntregaStr <= hojeStr) {
+            if (dataEntregaStr < hojeStr) {
                 console.log('entrou aqui')
                 mensagemErro = 'Data de entrega solicitada deve ser maior ou igual a hoje.';
                 solveTicket = true;
@@ -83,13 +83,13 @@ export class ProcessorDtentregaOv implements TicketProcessor {
 
             console.log('Validacao Gerente:', validacaoGerenteStatus);
 
-            const validacaoGerente = await validacaoGerencial(validacaoGerenteStatus, TIPO_FORM, TICKET_ID, GRUPO_VALIDACAO_GERENTE, dadosOV, filialVendedor, answer, ENDPOINT_PUT, aprovacaoFabrica);
+            const validacaoGerente = await validacaoGerencial(validacaoGerenteStatus, TIPO_FORM, TICKET_ID, GRUPO_VALIDACAO_GERENTE, dadosOV, filialVendedor, answer, ticket, ENDPOINT_PUT, aprovacaoFabrica);
 
 
             if (aprovacaoFabrica) {
                 const validacao: { status: number } = await httpClient.get(`${VALIDACAO_ENDPOINT}${GRUPO_VALIDACAO_FABRICA}`);
 
-                const validaCenarioFabrica = await validacaoGerencial(validacao, TIPO_FORM, TICKET_ID, GRUPO_VALIDACAO_FABRICA, dadosOV, filialVendedor, answer, ENDPOINT_PUT, aprovacaoFabrica);
+                const validaCenarioFabrica = await validacaoGerencial(validacao, TIPO_FORM, TICKET_ID, GRUPO_VALIDACAO_FABRICA, dadosOV, filialVendedor, answer, ticket, ENDPOINT_PUT, aprovacaoFabrica);
 
                 return validaCenarioFabrica;
             } else {
