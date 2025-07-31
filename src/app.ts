@@ -15,7 +15,7 @@ export class App {
             try {
                 const tickets = await this.ticketFetcher.fetchTickets();
                 console.log('Tickets processados:', tickets);
-                console.log(`Aguardando ${this.INTERVAL_MS / 1000} segundos para próxima execução...`);
+                //console.log(`Aguardando ${this.INTERVAL_MS / 1000} segundos para próxima execução...`);
                 await new Promise(resolve => setTimeout(resolve, this.INTERVAL_MS));
             } catch (error) {
                 console.error('Erro durante o processamento:', error);

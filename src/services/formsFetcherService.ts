@@ -6,6 +6,7 @@ import { ProcessorIe } from './processors/processor-ie';
 import { TicketProcessor } from './processors/processor.interface';
 import { AxiosError } from 'axios';
 import { ProcessorDtentregaAv } from './processors/processor-dtentregaav';
+import { ProcessorDtentregaOv } from './processors/processor-dtentregaov';
 export class FormsFetcherService {
     private serviceRepository: ServiceRepository;
     private processors: Record<string, TicketProcessor>;
@@ -13,43 +14,36 @@ export class FormsFetcherService {
     constructor() {
         this.serviceRepository = new ServiceRepository();
         this.processors = {
-            'processor-dtentregaov': new ProcessorDtentregaAv(),
+            'processor-dtentregaov': new ProcessorDtentregaOv(),
             //'processor-ie': new ProcessorIe(),
             //'processor-dtentregaav': new ProcessorDtentregaAv(),
-            // Adicionar processadores abaixo desse, assim que adicionar novas funcionalidades
+            // Adicionar processadores abaixo desse, assim que adicionar novas funcionalidadesT
         };
     }
 
     async fetchTickets(): Promise<GroupedAnswers[]> {
         const activeServices = await this.serviceRepository.findActiveServices();
-        const results: GroupedAnswers[] = [];
+        const promises: Promise<GroupedAnswers>[] = [];
         const answerEndpoint = '/answers/';
-        //console.log('activeServices', activeServices);
 
         for (const service of activeServices) {
             try {
-
-                console.log('service', service);
                 const rawData = await httpClient.get<any>(service.endpoint);
-
-                const validatedData = ticketSchema.parse(rawData); // Array de tickets
+                const validatedData = ticketSchema.parse(rawData);
                 const processor = this.processors[service.processorType];
                 if (processor) {
                     for (const ticket of validatedData) {
                         try {
                             const endpoint = `${answerEndpoint}${ticket.id}`;
                             const rawAnswers = await httpClient.get<any>(endpoint);
-                            const validatedAnswers = groupedAnswersSchema.parse(rawAnswers); // Valida como array
-                            // Processa cada answer individualmente 
+                            const validatedAnswers = groupedAnswersSchema.parse(rawAnswers);
                             for (const answer of validatedAnswers) {
-                                results.push(processor.process(answer, ticket)); // Adiciona o resultado do processamento ao array de resultados
+                                promises.push(processor.process(answer, ticket));
                             }
                         } catch (error) {
                             console.error(`Erro ao buscar respostas para o ticket ${ticket.id}:`, error);
                         }
                     }
-                } else {
-                    results
                 }
             } catch (error) {
                 if (error instanceof AxiosError) {
@@ -59,6 +53,7 @@ export class FormsFetcherService {
                 }
             }
         }
+        const results = await Promise.all(promises);
         return results;
     }
 }

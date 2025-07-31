@@ -1,8 +1,8 @@
 import { SchemaResponse } from '../../schemas/generalSchema';
 import { AdicionaAcompanhamentoSchema, Type } from '../../schemas/glpi/ticketSchema';
-import { createTicketInfo } from '../../utils/functions/createTicketInfo';
-import { createValidateInfo } from '../../utils/functions/createValidateInfo';
-import { textoInscricaoValidacaoIsento } from '../../utils/html/htmlInscricao';
+import { createTicketInfo } from './createTicketInfo';
+import { createValidateInfo } from './createValidateInfo';
+import { textoInscricaoValidacaoIsento } from '../html/htmlInscricao';
 import { atualizarInscricao } from '../../controllers/vmix/updateController';
 import { Formulario } from '../../types/interface/ieInterface';
 import { errorStatuses } from '../constants';

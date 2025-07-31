@@ -61,3 +61,18 @@ export const buscaDataEntregaAv = async (formulario: AlteraDataAvFormulario): Pr
         throw error;
     }
 }
+
+export const buscaLojaVendedor = async (codigoIntegracao: string): Promise<any> => {
+    try {
+        const pool = await vmixDiggerPool.connect();
+        const result = await pool.request()
+            .input('codigoIntegracao', codigoIntegracao)
+            .query('SELECT LOJA FROM ACESSO_OPERADORES WHERE CODIGOINTEGRACAO = @codigoIntegracao');
+
+        const row = result.recordset[0];
+        return row ? row.LOJA : null;
+    } catch (error: any) {
+        console.error('Erro ao buscar loja do vendedor:', error.message);
+        throw error;
+    }
+}

@@ -18,7 +18,7 @@ export const errorStatuses = [400, 404, 422];
 
 // Variáveis de ambiente para o SAP oDATA
 
-const sapOdataConfigs:any = {
+const sapOdataConfigs: any = {
   development: {
     baseUrl: process.env.DEV_SAP_ODATA_API_BASE_URL,
     username: process.env.DEV_SAP_ODATA_USERNAME,

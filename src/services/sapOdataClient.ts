@@ -8,7 +8,6 @@ import {
 
 export class SapOdataClient {
   private client: AxiosInstance;
-
   constructor() {
     this.client = axios.create({
       baseURL: sapOdataBaseUrl,
@@ -23,6 +22,8 @@ export class SapOdataClient {
   }
 
   async get<T>(endpoint: string, config?: AxiosRequestConfig): Promise<T> {
+    console.log('Making GET request to:', endpoint);
+    console.log('Request config:', config);
     const response = await this.client.get(endpoint, config);
     return response.data;
   }
@@ -33,7 +34,29 @@ export class SapOdataClient {
   }
 
   async put<T, D = any>(endpoint: string, data: D, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.client.put(endpoint, data, config);
+    const getResponse = await this.client.get(endpoint, {
+      headers: {
+        'x-csrf-token': 'Fetch',
+      },
+    });
+
+    const csrfToken = getResponse.headers['x-csrf-token'];
+    const setCookie = getResponse.headers['set-cookie'] || getResponse.headers['set-cookie2'];
+
+
+    console.log('endpoint:', endpoint);
+    const putHeaders = {
+      ...config?.headers,
+      'x-csrf-token': csrfToken,
+      'Cookie': Array.isArray(setCookie) ? setCookie.join('; ') : setCookie,
+    };
+
+
+    const response = await this.client.put(endpoint, data, {
+      ...config,
+      headers: putHeaders,
+    });
+
     return response.data;
   }
 }

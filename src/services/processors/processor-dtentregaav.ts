@@ -20,8 +20,6 @@ export class ProcessorDtentregaAv implements TicketProcessor {
             let solveTicket = true;
             let ticketInfo;
 
-            console.log('answer:', answer)
-
             let requesterLocation = ticket.requester['location']
             if (answer.questions['Filial'] != null && answer.questions['Filial'] != undefined) {
                 requesterLocation = answer.questions['Filial'];
@@ -50,7 +48,7 @@ export class ProcessorDtentregaAv implements TicketProcessor {
                 solveTicket = true;
             }
 
-            if (!mensagemErro) { 
+            if (!mensagemErro) {
                 const atualizaDataEntrega = await atualizaDataProcesso(formulario);
                 if (atualizaDataEntrega.status == 400) {
                     mensagemErro = atualizaDataEntrega.message;

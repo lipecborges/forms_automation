@@ -1,4 +1,4 @@
-import { buscaDataEntregaAv, buscaUfCliente } from '../../model/vmix/searchModel';
+import { buscaDataEntregaAv, buscaLojaVendedor, buscaUfCliente } from '../../model/vmix/searchModel';
 import { SchemaResponse } from '../../schemas/generalSchema';
 import { AlteraDataAvFormulario } from '../../types/interface/dtEntregaAvInterface';
 
@@ -39,3 +39,21 @@ export const buscaDataProcessoAv = async (formulario: AlteraDataAvFormulario): P
         throw error;
     }
 }
+
+export const buscaFilialVendedor = async (codigoIntegracao: string): Promise<any> => {
+    try {
+        const filialVendedor = await buscaLojaVendedor(codigoIntegracao);
+        if (!filialVendedor) {
+            return {
+                status: 400,
+                message: 'Nâo foi encontrado a filial do vendedor',
+            } as SchemaResponse;
+        }
+
+        return filialVendedor;
+
+    } catch (error: any) {
+        console.error(`Erro ao buscar filial do vendedor com código de integração ${codigoIntegracao}:`, error.message);
+        throw error;
+    }
+};

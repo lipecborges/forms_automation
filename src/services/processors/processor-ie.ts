@@ -9,11 +9,11 @@ import { CnpjaResponse, Formulario } from '../../types/interface/ieInterface';
 import { SchemaResponse } from '../../schemas/generalSchema';
 import { BuscaUf } from '../../controllers/vmix/searchController';
 import trataRespostaCnpja from '../../utils/functions/trataRespostaCnpja';
-import { validaCenariosFiscal } from '../../utils/functions/validacaoGrupo';
+import { validaCenariosFiscal } from '../../utils/functions/validacaoFiscal';
 import { TicketSchema } from '../../schemas/glpi/ticketSchema';
 
 export class ProcessorIe implements TicketProcessor {
-    process(answer: GroupedAnswers, ticket: TicketSchema): GroupedAnswers {
+    async process(answer: GroupedAnswers, ticket: TicketSchema): Promise<GroupedAnswers> {
         (async () => {
             // Constantes fixas
             const SIM = 'SIM';
@@ -21,7 +21,7 @@ export class ProcessorIe implements TicketProcessor {
             const CONTRIBUINTE = 'CONTRIBUINTE';
             const PESSOA_FISICA = 'PESSOA FÍSICA';
             const PESSOA_JURIDICA = 'PESSOA JURÍDICA';
-            const GRUPO_VALIDACAO = 'Fiscal';
+            const GRUPO_VALIDACAO = 'Contabilidade > Fiscal';
 
             // Objeto com os status de inscrição estadual
             const STATUS_INSCRICAO = {
@@ -44,7 +44,6 @@ export class ProcessorIe implements TicketProcessor {
             const ticketId = answer.ticketId;
             const produtorRural = answer.questions['Produtor_Rural']?.trim().toUpperCase() || 'NÃO';
 
-            console.log(`tipo de taxid: ${typeof taxId} e taxid: ${taxId}`);
             // Endpoints
             const solTicketEndpoint = `/solucionaTicket/${ticketId}`;
             const validacoesTicketEndpoint = `/validacoesTicket/${ticketId}?grupo=${GRUPO_VALIDACAO}`;
@@ -186,7 +185,7 @@ export class ProcessorIe implements TicketProcessor {
                         taxId,
                         states: formulario.uf,
                     });
-                    console.log('antes do tratarespsota')
+
                     const trataResposta = await trataRespostaCnpja<SchemaResponse>(
                         cnpjaResposta,
                         httpClient,
@@ -244,7 +243,6 @@ export class ProcessorIe implements TicketProcessor {
                                 ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
                             }
                         } else {
-                            console.log('chegou no else')
                             const result = await validaCenariosFiscal(
                                 validacaoFiscal,
                                 inscricoes,
@@ -272,8 +270,6 @@ export class ProcessorIe implements TicketProcessor {
                         httpClient,
                         addAcompanhamentoEndpoint
                     );
-
-                    console.log('Erro tratado com sucesso');
                     return trataResposta;
                 }
 

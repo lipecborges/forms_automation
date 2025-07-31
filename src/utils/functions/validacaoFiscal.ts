@@ -4,41 +4,96 @@ import { createTicketInfo } from '../../utils/functions/createTicketInfo';
 import { createValidateInfo } from '../../utils/functions/createValidateInfo';
 import { textoInscricaoValidacaoIsento } from '../../utils/html/htmlInscricao';
 import { atualizarInscricao } from '../../controllers/vmix/updateController';
-import { errorStatuses } from '../../utils/constants';
+import { Formulario } from '../../types/interface/ieInterface';
+import { errorStatuses } from '../constants';
+import { close } from 'fs';
 
-export async function validacaoFiscal(
+export async function validaCenariosFiscal(
     validacaoFiscal: { status: number },
     inscricoes: any[],
-    formulario: { uf: string, produtorRural?: string },
+    formulario: Formulario,
     taxId: string,
     tipoForm: Type,
     httpClient: any,
-    ticketId: string,
+    ticketId: number,
     GRUPO_VALIDACAO: string,
-    ISENTO: string,
-    errorStatuses: number[]
 ): Promise<SchemaResponse | any> {
     let solveTicket = false;
     let closeTicket = false;
     let mensagemSucesso = '';
     let mensagemErro = '';
     let mensagemAlerta = '';
+    const ISENTO = 'ISENTO';
+    const CONTRIBUINTE = 'CONTRIBUINTE';
+    let userValidateId: number | undefined;
+    // Objeto com os status de inscrição estadual
+    const STATUS_INSCRICAO = {
+        1: 'Sem restrição.',
+        2: 'Bloqueado como destinatário na UF.',
+        3: 'Vedada operação como destinatário na UF.'
+    }
+
+    const produtorRural = formulario.produtorRural?.trim().toUpperCase() || 'NÃO';
 
     const addAcompanhamentoEndpoint = `/adicionaAcompanhamento/${ticketId}`;
     const solicitaValidacaoEndpoint = `/solicitaValidacao/${ticketId}`;
 
-    const produtorRural = formulario.produtorRural?.trim().toUpperCase() || 'NÃO';
-
     let ticketInfo: AdicionaAcompanhamentoSchema;
+    const inscricoesValidas = inscricoes.filter(ins => ins.enabled && ins.status.id === 1);
 
     switch (validacaoFiscal.status) {
-        case 1:
-            let userValidateId: number | undefined;
-            const inscricoesValidas = inscricoes.filter(ins => ins.enabled && ins.status.id === 1);
-            const numerosValidos = inscricoesValidas.map(ins => ins.number).join(', ') || 'nenhuma inscrição válida encontrada';
+        case 1: // Precisa de validação
+            if (inscricoesValidas.length === 1 && formulario.tipoInscricao != ISENTO) {
+                inscricoesValidas[0].number = inscricoesValidas[0].number.replace(/^0+/, ''); // Removendo zero a esquerda
+                const inscricao = inscricoesValidas.find(i => i.number === formulario.inscricaoEstadual);
+                if (!inscricao) {
+                    mensagemErro = 'Inscrição Estadual informada no formulário não corresponde a nenhuma inscrição válida no cadastro.';
+                    closeTicket = true;
+                    solveTicket = true;
+                    ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
+                    const adicionaAcompanhamento = await httpClient.post(addAcompanhamentoEndpoint, ticketInfo);
+                    return adicionaAcompanhamento;
+                }
+
+                if (inscricao.number === formulario.inscricaoEstadual) {
+                    if (inscricao.enabled) {
+                        const numeroInscricao = inscricao.number;
+                        switch (inscricao.status.id) {
+                            case 1:
+                                const atualizaInscricao = await atualizarInscricao(taxId, numeroInscricao, produtorRural);
+                                if (errorStatuses.includes(atualizaInscricao.status)) {
+                                    return atualizaInscricao;
+                                }
+                                mensagemSucesso = numeroInscricao.toString();
+                                solveTicket = true;
+                                closeTicket = true;
+                                ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
+                                const adicionaAcompanhamento = await httpClient.post(addAcompanhamentoEndpoint, ticketInfo);
+                                return adicionaAcompanhamento;
+                            case 2:
+                                mensagemErro = STATUS_INSCRICAO[2];
+                                mensagemAlerta = 'Necessário análise da situação cadastral do cliente';
+                                break;
+                            case 3:
+                                mensagemErro = STATUS_INSCRICAO[3];
+                                mensagemAlerta = 'Necessário análise da situação cadastral do cliente';
+                                break;
+                            default:
+                                break;
+                        }
+                    } else {
+                        mensagemErro = 'Inscrição Estadual não habilitada';
+                        mensagemAlerta = 'Necessário análise da situação cadastral do cliente';
+                    }
+
+                }
+            } else {
+                const numerosValidos = inscricoesValidas.map(ins => ins.number).join(', ') || 'nenhuma inscrição válida encontrada';
+                mensagemAlerta = textoInscricaoValidacaoIsento(numerosValidos, formulario.uf);
+                mensagemErro = 'Necessário Validação da Equipe Fiscal';
+            }
+
             const mensagemValidacao = 'Por gentileza, valide as informações e aprove ou recuse a alteração.';
-            mensagemAlerta = textoInscricaoValidacaoIsento(numerosValidos, formulario.uf);
-            mensagemErro = 'Necessário Validação da Equipe Fiscal';
 
             ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
             const adicionaAcompanhamento = await httpClient.post(addAcompanhamentoEndpoint, ticketInfo);
@@ -48,30 +103,47 @@ export async function validacaoFiscal(
             }
 
             const validateInfo = createValidateInfo(mensagemValidacao, userValidateId, GRUPO_VALIDACAO);
+
             await new Promise(resolve => setTimeout(resolve, 2000)); // Delay de 2 segundos
+
             const solicitaValidacao = await httpClient.post(solicitaValidacaoEndpoint, validateInfo);
 
             return solicitaValidacao;
 
-        case 2:
+        case 2: // Aguardando validação
             return {
                 status: 400,
                 message: 'Aguardando validação do grupo fiscal',
             } as SchemaResponse;
-
-        case 3:
-            const atualizaInscricao = await atualizarInscricao(taxId, ISENTO, produtorRural);
-            if (errorStatuses.includes(atualizaInscricao.status)) {
-                mensagemErro = 'Não foi encontrado cliente com o CPF informado';
-            } else {
-                mensagemSucesso = ISENTO;
+        case 3: // Validação aprovada
+            if (formulario.tipoInscricao === ISENTO) {
+                const atualizaInscricao = await atualizarInscricao(taxId, ISENTO, produtorRural);
+                if (errorStatuses.includes(atualizaInscricao.status)) {
+                    mensagemErro = 'Não foi encontrado cliente com o CPF informado';
+                } else {
+                    mensagemSucesso = ISENTO;
+                    solveTicket = true;
+                    closeTicket = true;
+                }
+            } else if (formulario.tipoInscricao === CONTRIBUINTE) {
+                let numeroInscricao = formulario.inscricaoEstadual?.trim().toUpperCase() || '';
+                const atualizaInscricao = await atualizarInscricao(taxId, numeroInscricao, produtorRural);
+                if (errorStatuses.includes(atualizaInscricao.status)) {
+                    mensagemErro = 'Não foi encontrado cliente com o CPF informado';
+                } else {
+                    mensagemSucesso = numeroInscricao;
+                    solveTicket = true;
+                    closeTicket = true;
+                }
             }
             ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
             return await httpClient.post(addAcompanhamentoEndpoint, ticketInfo);
 
-        case 4:
+        case 4: // Validação recusada
             mensagemErro = 'O processo passou por análise da equipe fiscal, mas foi recusado.';
             mensagemAlerta = 'Necessário análise da situação cadastral do cliente';
+            solveTicket = true;
+            closeTicket = true;
             ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
             return await httpClient.post(addAcompanhamentoEndpoint, ticketInfo);
 
