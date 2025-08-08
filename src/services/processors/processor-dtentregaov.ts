@@ -42,6 +42,7 @@ export class ProcessorDtentregaOv implements TicketProcessor {
             console.log('ticketId:', TICKET_ID);
             console.log('Data de entrega solicitada:', DATA_ENTREGA_SOLICITADA);
             const dataEntrega = new Date(DATA_ENTREGA_SOLICITADA);
+            const diaSemana = dataEntrega.getDay();
             const hoje = new Date();
 
             const dataEntregaStr = dataEntrega.toISOString().slice(0, 10);
@@ -62,6 +63,19 @@ export class ProcessorDtentregaOv implements TicketProcessor {
                 }
 
                 return { status: 400, message: mensagemErro } as SchemaResponse;
+            } else if (diaSemana === 0 || diaSemana === 6) {
+                // 0 = domingo, 6 = sábado
+                mensagemErro = 'Data de entrega não pode ser no fim de semana.';
+                solveTicket = true;
+                closeTicket = true;
+                ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, TIPO_FORM, mensagemAlerta, solveTicket, closeTicket);
+                const adicionaAcompanhamento: any = await httpClient.post(ADD_ACOMPANHAMENTO_ENDPOINT, ticketInfo);
+
+                if (errorStatuses.includes(adicionaAcompanhamento.status)) {
+                    return { status: 400, message: 'Erro ao adicionar acompanhamento no ticket' };
+                }
+
+                return { status: 400, message: mensagemErro };
             }
 
             const salesOrders = await sapOdataClient.get(ENDPOINT_GET);
@@ -78,17 +92,13 @@ export class ProcessorDtentregaOv implements TicketProcessor {
             const codigoIntegracao = dadosOV.vendedor;
             const filialVendedor = await buscaFilialVendedor(codigoIntegracao);
 
-
             const GRUPO_VALIDACAO_GERENTE = `Filial 0${centroOvSemZeros} > Administrativo > Alterar Data de Entrega da Venda`;
-
-            //console.log('Filial do vendedor:', filialVendedor);
 
             const validacaoGerenteStatus: { status: number } = await httpClient.get(`${VALIDACAO_ENDPOINT}${GRUPO_VALIDACAO_GERENTE}`);
 
             console.log('Validacao Gerente:', validacaoGerenteStatus);
 
             await validacaoGerencial(validacaoGerenteStatus, TIPO_FORM, TICKET_ID, GRUPO_VALIDACAO_GERENTE, dadosOV, filialVendedor, answer, ticket, ENDPOINT_PUT, aprovacaoFabrica);
-
 
             if (aprovacaoFabrica) {
                 const validacao: { status: number } = await httpClient.get(`${VALIDACAO_ENDPOINT}${GRUPO_VALIDACAO_FABRICA}`);
