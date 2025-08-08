@@ -25,3 +25,9 @@ export function parseDataBr(dataBr: string) {
     const [dia, mes, ano] = dataBr.split('/');
     return new Date(`${ano}-${mes}-${dia}`);
 }
+
+export function parseDateISO(dateStr: string) {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    // Mês em JS começa do zero!
+    return new Date(year, month - 1, day);
+}

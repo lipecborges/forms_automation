@@ -11,6 +11,7 @@ import { SchemaResponse } from '../../schemas/generalSchema';
 import { toSapOdataDate } from '../../utils/functions/toSapOdataDate';
 import { errorStatuses } from '../../utils/constants';
 import { buscaFilialVendedor } from '../../controllers/vmix/searchController';
+import { parseDateISO } from '../../utils/functions/formatarDataBr';
 
 export class ProcessorDtentregaOv implements TicketProcessor {
     async process(answer: GroupedAnswers, ticket: TicketSchema): Promise<any> {
@@ -41,15 +42,18 @@ export class ProcessorDtentregaOv implements TicketProcessor {
         try {
             console.log('ticketId:', TICKET_ID);
             console.log('Data de entrega solicitada:', DATA_ENTREGA_SOLICITADA);
-            const dataEntrega = new Date(DATA_ENTREGA_SOLICITADA);
-            const diaSemana = dataEntrega.getDay();
+            const dataEntrega = parseDateISO(DATA_ENTREGA_SOLICITADA);
             const hoje = new Date();
+            const diaSemana = dataEntrega.getDay();
 
             const dataEntregaStr = dataEntrega.toISOString().slice(0, 10);
             const hojeStr = hoje.toISOString().slice(0, 10);
 
+
             console.log('Data de entrega formatada:', dataEntregaStr);
             console.log('Data de hoje formatada:', hojeStr);
+            console.log('Dia da semana:', diaSemana);
+
             if (dataEntregaStr < hojeStr) {
                 console.log('entrou aqui')
                 mensagemErro = 'Data de entrega solicitada deve ser maior ou igual a hoje.';
@@ -65,7 +69,7 @@ export class ProcessorDtentregaOv implements TicketProcessor {
                 return { status: 400, message: mensagemErro } as SchemaResponse;
             } else if (diaSemana === 0 || diaSemana === 6) {
                 // 0 = domingo, 6 = sábado
-                mensagemErro = 'Data de entrega não pode ser no fim de semana.';
+                mensagemErro = 'Data de entrega solicitada só pode ser em dias úteis.';
                 solveTicket = true;
                 closeTicket = true;
                 ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, TIPO_FORM, mensagemAlerta, solveTicket, closeTicket);
