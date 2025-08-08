@@ -2,7 +2,7 @@ import { FormsFetcherService } from './services/formsFetcherService';
 
 export class App {
     private ticketFetcher: FormsFetcherService;
-    private readonly INTERVAL_MS = 6000; // 30 segundos em milissegundos
+    private readonly INTERVAL_MS = 6000; // 6 segundos em milissegundos
 
     constructor() {
         this.ticketFetcher = new FormsFetcherService();

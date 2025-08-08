@@ -33,6 +33,7 @@ export class ProcessorDtentregaOv implements TicketProcessor {
         const FORMAT = '?$format=json';
         const ADD_ACOMPANHAMENTO_ENDPOINT = `/adicionaAcompanhamento/${TICKET_ID}`;
         const ENDPOINT_GET = `${OV_ENDPOINT}${OV_HEADER_ENDPOINT}('${ORDEM_VENDA}')${FORMAT}`;
+
         const ENDPOINT_PUT = `${OV_ENDPOINT}${OV_HEADER_ENDPOINT}('${ORDEM_VENDA}')`;
 
         const VALIDACAO_ENDPOINT = `/validacoesTicket/${TICKET_ID}?grupo=`;
@@ -62,10 +63,12 @@ export class ProcessorDtentregaOv implements TicketProcessor {
 
                 return { status: 400, message: mensagemErro } as SchemaResponse;
             }
+
             const salesOrders = await sapOdataClient.get(ENDPOINT_GET);
 
             // Aqui você trata os dados
             const dadosOV: DadosOV = mapSalesOrder(salesOrders);
+            let centroOvSemZeros = dadosOV.centro.replace(/^0+/, '');
 
             if (FABRICA.includes(dadosOV.centro)) {
                 aprovacaoFabrica = true;
@@ -75,9 +78,10 @@ export class ProcessorDtentregaOv implements TicketProcessor {
             const codigoIntegracao = dadosOV.vendedor;
             const filialVendedor = await buscaFilialVendedor(codigoIntegracao);
 
-            const GRUPO_VALIDACAO_GERENTE = `Filial 0${filialVendedor} > Administrativo > Alterar Data de Entrega da Venda`;
 
-            console.log('Filial do vendedor:', filialVendedor);
+            const GRUPO_VALIDACAO_GERENTE = `Filial 0${centroOvSemZeros} > Administrativo > Alterar Data de Entrega da Venda`;
+
+            //console.log('Filial do vendedor:', filialVendedor);
 
             const validacaoGerenteStatus: { status: number } = await httpClient.get(`${VALIDACAO_ENDPOINT}${GRUPO_VALIDACAO_GERENTE}`);
 

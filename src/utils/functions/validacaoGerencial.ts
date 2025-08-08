@@ -66,6 +66,7 @@ export async function validacaoGerencial(
             } else {
                 infoData = `A data de entrega não foi alterada.`;
             }
+
             if (GRUPO_VALIDACAO === GRUPO_VALIDACAO_GERENTE && !validacaoFabrica) {
                 mensagemAlerta = textoValidacaoUnicaGerente(dadosOV.ordem, dadosOV.centro, dataEntregaAtual, dataEntregaSolicitada, infoData);
             } else if (GRUPO_VALIDACAO === GRUPO_VALIDACAO_GERENTE && validacaoFabrica) {
@@ -115,12 +116,12 @@ export async function validacaoGerencial(
                 USUARIO_SOLICITACAO: USUARIO_SOLICITACAO,
             };
 
-            console.log('payloadDtEntrega:', payloadDtEntrega);
             const alteraDtEntrega: any = await sapOdataClient.put(endpoint, payloadDtEntrega);
 
             if (errorStatuses.includes(alteraDtEntrega.status)) {
                 return { status: 400, message: 'Erro ao alterar data de entrega' } as SchemaResponse;
             }
+
             mensagemSucesso = 'Data de entrega da venda alterada com sucesso.';
             solveTicket = true;
             closeTicket = true;
