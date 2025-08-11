@@ -86,8 +86,8 @@ export class ProcessorDtentregaOv implements TicketProcessor {
 
             // Aqui você trata os dados
             const dadosOV: DadosOV = mapSalesOrder(salesOrders);
-            let centroOvSemZeros = dadosOV.centro.replace(/^0+/, '');
 
+            console.log('centro', dadosOV.centro);
             if (FABRICA.includes(dadosOV.centro)) {
                 aprovacaoFabrica = true;
             }
@@ -96,7 +96,13 @@ export class ProcessorDtentregaOv implements TicketProcessor {
             const codigoIntegracao = dadosOV.vendedor;
             const filialVendedor = await buscaFilialVendedor(codigoIntegracao);
 
-            const GRUPO_VALIDACAO_GERENTE = `Filial 0${centroOvSemZeros} > Administrativo > Alterar Data de Entrega da Venda`;
+            let centroAprovacao
+            if (aprovacaoFabrica) {
+                centroAprovacao = filialVendedor
+            } else {
+                centroAprovacao = dadosOV.centro.replace(/^0+/, '');
+            }
+            const GRUPO_VALIDACAO_GERENTE = `Filial 0${centroAprovacao} > Administrativo > Alterar Data de Entrega da Venda`;
 
             const validacaoGerenteStatus: { status: number } = await httpClient.get(`${VALIDACAO_ENDPOINT}${GRUPO_VALIDACAO_GERENTE}`);
 
