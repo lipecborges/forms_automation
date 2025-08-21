@@ -129,11 +129,11 @@ export class ProcessorDtentregaOv implements TicketProcessor {
                     mensagem = data.error.message.value;
                 }
 
-                // mensagemErro = mensagem;
-                // closeTicket = true;
-                // solveTicket = true;
-                // ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
-                // const encerraChamado = await httpClient.post(addAcompanhamentoEndpoint, ticketInfo);
+                mensagemErro = mensagem;
+                closeTicket = true;
+                solveTicket = true;
+                ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, TIPO_FORM, mensagemAlerta, solveTicket, closeTicket);
+                const encerraChamado = await httpClient.post(ADD_ACOMPANHAMENTO_ENDPOINT, ticketInfo);
                 return { status: error.response.status || 400, message: mensagem } as SchemaResponse;
             } else {
                 console.error('Erro desconhecido ao alterar data de entrega:', error);
