@@ -103,14 +103,15 @@ export class ProcessorDtentregaOv implements TicketProcessor {
                 centroAprovacao = filialVendedor
                 if (dadosOV.tipoDoc === 'ZB2C') {
                     grupoValidacaoGerente = GRUPO_VALIDACAO_FABRICA;
+
                 } else {
                     centroAprovacao = filialVendedor
+                    grupoValidacaoGerente = `Filial 0${centroAprovacao} > Administrativo > Alterar Data de Entrega da Venda`;
                 }
             } else {
                 centroAprovacao = dadosOV.centro.replace(/^0+/, '');
+                grupoValidacaoGerente = `Filial 0${centroAprovacao} > Administrativo > Alterar Data de Entrega da Venda`;
             }
-
-            grupoValidacaoGerente = `Filial 0${centroAprovacao} > Administrativo > Alterar Data de Entrega da Venda`;
 
             const validacaoGerenteStatus: { status: number } = await httpClient.get(`${VALIDACAO_ENDPOINT}${grupoValidacaoGerente}`);
 
