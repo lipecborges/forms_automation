@@ -47,6 +47,8 @@ export async function validacaoGerencial(
     const dataEntregaSolicitada = formatarDataBr(answer.questions['Data_de_Entrega']);
     const dataEntregaAtual = formatarDataBr(dadosOV.dataEntrega);
     const GRUPO_VALIDACAO_GERENTE = `Filial 0${filialVendedor} > Administrativo > Alterar Data de Entrega da Venda`;
+    const GRUPO_VALIDACAO_FABRICA = 'Fábrica > Alterar Data de Entrega da Venda';
+    const tipo_ecommerce = 'ZB2C';
 
     const addAcompanhamentoEndpoint = `/adicionaAcompanhamento/${ticketId}`;
     const solicitaValidacaoEndpoint = `/solicitaValidacao/${ticketId}`;

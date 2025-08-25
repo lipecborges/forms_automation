@@ -39,6 +39,8 @@ export class ProcessorDtentregaOv implements TicketProcessor {
 
         const VALIDACAO_ENDPOINT = `/validacoesTicket/${TICKET_ID}?grupo=`;
 
+        let grupoValidacaoGerente
+
         try {
             console.log('ticketId:', TICKET_ID);
             console.log('Data de entrega solicitada:', DATA_ENTREGA_SOLICITADA);
@@ -99,16 +101,22 @@ export class ProcessorDtentregaOv implements TicketProcessor {
             let centroAprovacao
             if (aprovacaoFabrica) {
                 centroAprovacao = filialVendedor
+                if (dadosOV.tipoDoc === 'ZB2C') {
+                    grupoValidacaoGerente = GRUPO_VALIDACAO_FABRICA;
+                } else {
+                    centroAprovacao = filialVendedor
+                }
             } else {
                 centroAprovacao = dadosOV.centro.replace(/^0+/, '');
             }
-            const GRUPO_VALIDACAO_GERENTE = `Filial 0${centroAprovacao} > Administrativo > Alterar Data de Entrega da Venda`;
 
-            const validacaoGerenteStatus: { status: number } = await httpClient.get(`${VALIDACAO_ENDPOINT}${GRUPO_VALIDACAO_GERENTE}`);
+            grupoValidacaoGerente = `Filial 0${centroAprovacao} > Administrativo > Alterar Data de Entrega da Venda`;
+
+            const validacaoGerenteStatus: { status: number } = await httpClient.get(`${VALIDACAO_ENDPOINT}${grupoValidacaoGerente}`);
 
             console.log('Validacao Gerente:', validacaoGerenteStatus);
 
-            await validacaoGerencial(validacaoGerenteStatus, TIPO_FORM, TICKET_ID, GRUPO_VALIDACAO_GERENTE, dadosOV, filialVendedor, answer, ticket, ENDPOINT_PUT, aprovacaoFabrica);
+            await validacaoGerencial(validacaoGerenteStatus, TIPO_FORM, TICKET_ID, grupoValidacaoGerente, dadosOV, filialVendedor, answer, ticket, ENDPOINT_PUT, aprovacaoFabrica);
 
             if (aprovacaoFabrica) {
                 const validacao: { status: number } = await httpClient.get(`${VALIDACAO_ENDPOINT}${GRUPO_VALIDACAO_FABRICA}`);
