@@ -128,7 +128,7 @@ export class ProcessorIe implements TicketProcessor {
                         return addAcompanhamento;
                     }
 
-                    const inscricao = inscricoes.find(i => i.number === formulario.inscricaoEstadual);
+                    const inscricao = inscricoes.find(i => i.number.replace(/^0+/, '') === formulario.inscricaoEstadual);
 
                     if (inscricao) { // Se encontrou a inscrição estadual faz os tratamentos
                         if (inscricao.enabled) {
