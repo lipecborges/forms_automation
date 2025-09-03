@@ -117,12 +117,12 @@ export class ProcessorDtentregaOv implements TicketProcessor {
 
             console.log('Validacao Gerente:', validacaoGerenteStatus);
 
-            await validacaoGerencial(validacaoGerenteStatus, TIPO_FORM, TICKET_ID, grupoValidacaoGerente, dadosOV, filialVendedor, answer, ticket, ENDPOINT_PUT, aprovacaoFabrica);
+            await validacaoGerencial(validacaoGerenteStatus, TIPO_FORM, TICKET_ID, grupoValidacaoGerente, dadosOV, filialVendedor, answer, ticket, ENDPOINT_PUT, aprovacaoFabrica, centroAprovacao);
 
             if (aprovacaoFabrica) {
                 const validacao: { status: number } = await httpClient.get(`${VALIDACAO_ENDPOINT}${GRUPO_VALIDACAO_FABRICA}`);
 
-                const validaCenarioFabrica = await validacaoGerencial(validacao, TIPO_FORM, TICKET_ID, GRUPO_VALIDACAO_FABRICA, dadosOV, filialVendedor, answer, ticket, ENDPOINT_PUT, aprovacaoFabrica);
+                const validaCenarioFabrica = await validacaoGerencial(validacao, TIPO_FORM, TICKET_ID, GRUPO_VALIDACAO_FABRICA, dadosOV, filialVendedor, answer, ticket, ENDPOINT_PUT, aprovacaoFabrica, centroAprovacao);
 
                 return validaCenarioFabrica;
             }

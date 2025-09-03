@@ -21,7 +21,8 @@ export async function validacaoGerencial(
     answer: GroupedAnswers,
     ticket: TicketSchema,
     endpoint: string,
-    validacaoFabrica: boolean
+    validacaoFabrica: boolean,
+    centroAprovacao: string
 ): Promise<SchemaResponse | any> {
     let solveTicket = false;
     let closeTicket = false;
@@ -46,7 +47,7 @@ export async function validacaoGerencial(
     const USUARIO_SOLICITACAO = ticket.requester.name;
     const dataEntregaSolicitada = formatarDataBr(answer.questions['Data_de_Entrega']);
     const dataEntregaAtual = formatarDataBr(dadosOV.dataEntrega);
-    const GRUPO_VALIDACAO_GERENTE = `Filial 0${filialVendedor} > Administrativo > Alterar Data de Entrega da Venda`;
+    const GRUPO_VALIDACAO_GERENTE = `Filial 0${centroAprovacao} > Administrativo > Alterar Data de Entrega da Venda`;
     const GRUPO_VALIDACAO_FABRICA = 'Fábrica > Alterar Data de Entrega da Venda';
     const tipo_ecommerce = 'ZB2C';
 
@@ -77,6 +78,7 @@ export async function validacaoGerencial(
                 mensagemErro = 'Necessário validação do Gerente de Planejamento de Produção e Logística';
                 mensagemAlerta = textoValidacaoLogistica(dadosOV.ordem, dadosOV.centro, dataEntregaAtual, dataEntregaSolicitada, infoData);
             }
+
             const mensagemValidacao = 'Por gentileza, valide as informações e aprove ou recuse a alteração.';
             ticketInfo = createTicketInfo(mensagemSucesso, mensagemErro, tipoForm, mensagemAlerta, solveTicket, closeTicket);
             const adicionaAcompanhamento: any = await httpClient.post(addAcompanhamentoEndpoint, ticketInfo);
